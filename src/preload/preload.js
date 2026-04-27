@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('api', {
   queue: {
     add: (item) => ipcRenderer.invoke('queue:add', item),
     list: () => ipcRenderer.invoke('queue:list'),
+    start: (id) => ipcRenderer.invoke('queue:start', id),
+    startQueued: () => ipcRenderer.invoke('queue:startQueued'),
     pause: (id) => ipcRenderer.invoke('queue:pause', id),
     resume: (id) => ipcRenderer.invoke('queue:resume', id),
     cancel: (id) => ipcRenderer.invoke('queue:cancel', id),

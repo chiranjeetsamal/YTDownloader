@@ -166,6 +166,7 @@ h3 {
 .download-topline p,
 .metadata-body p,
 .form-message,
+.download-hint,
 .metrics {
   color: var(--muted);
 }
@@ -236,6 +237,10 @@ select {
 .large {
   min-width: 180px;
   min-height: 48px;
+}
+
+.download-hint {
+  font-size: 14px;
 }
 
 .preview-grid {

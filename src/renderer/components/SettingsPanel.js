@@ -1,5 +1,11 @@
 (function () {
-  const { escapeHtml } = window.FormatSelector;
+  const escapeHtml = window.FormatSelector?.escapeHtml || ((value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]));
 
   function selected(value, current) {
     return value === current ? 'selected' : '';

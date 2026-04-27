@@ -82,6 +82,8 @@ ipcMain.handle('url:validate', (_event, url) => isSupportedUrl(url));
 
 ipcMain.handle('queue:add', (_event, item) => queue.add(item));
 ipcMain.handle('queue:list', () => queue.snapshot());
+ipcMain.handle('queue:start', (_event, id) => queue.startDownload(id));
+ipcMain.handle('queue:startQueued', () => queue.startQueued());
 ipcMain.handle('queue:pause', (_event, id) => queue.pause(id));
 ipcMain.handle('queue:resume', (_event, id) => queue.resume(id));
 ipcMain.handle('queue:cancel', (_event, id) => queue.cancel(id));

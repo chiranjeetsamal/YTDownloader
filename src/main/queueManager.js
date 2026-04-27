@@ -47,8 +47,23 @@ class QueueManager extends EventEmitter {
     this.items.set(id, queued);
     this.persist();
     this.emitUpdate();
-    this.pump();
     return queued;
+  }
+
+  startDownload(id) {
+    const item = this.items.get(id);
+    if (!item || !['queued', 'failed'].includes(item.status)) return;
+    item.status = 'queued';
+    item.wasCancelled = false;
+    item.wasPaused = false;
+    item.error = '';
+    this.persist();
+    this.emitUpdate();
+    this.pump();
+  }
+
+  startQueued() {
+    this.pump();
   }
 
   pause(id) {
@@ -101,7 +116,6 @@ class QueueManager extends EventEmitter {
     });
     this.persist();
     this.emitUpdate();
-    this.pump();
   }
 
   remove(id) {

@@ -127,8 +127,10 @@ FFmpeg is required for merging separate video/audio streams, audio conversion, e
 3. Review the metadata preview.
 4. Choose video quality, audio format, download mode, and output container.
 5. Choose a download folder.
-6. Add the item to the queue.
-7. Manage the download from the Queue page.
+6. Click Add to Queue.
+7. Open the Queue page.
+8. Click Download on a queued item, or click Start downloads to begin queued items up to your concurrency limit.
+9. Manage progress from the Queue page.
 
 Pause/resume behavior is intentionally Windows-safe. `yt-dlp` does not provide universal stdin pause/resume, so the app pauses by terminating the active process and resumes by restarting the same download with `--continue` and partial files enabled.
 

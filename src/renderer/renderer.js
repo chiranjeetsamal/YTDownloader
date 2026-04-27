@@ -12,7 +12,70 @@ const appState = {
 
 const $ = (selector) => document.querySelector(selector);
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]);
+}
+
+function ensureRendererComponents() {
+  if (!window.FormatSelector) {
+    window.FormatSelector = {
+      escapeHtml,
+      read: () => ({
+        mode: $('#modeSelect')?.value || 'video-audio',
+        videoQuality: $('#videoQuality')?.value || 'best',
+        videoFormatId: $('#videoFormatId')?.value || '',
+        audioFormatId: $('#audioFormatId')?.value || '',
+        audioFormat: $('#audioFormat')?.value || 'best',
+        container: $('#containerSelect')?.value || 'mp4',
+        editingPreset: Boolean($('#editingPreset')?.checked)
+      }),
+      render: () => '<div class="empty-state error-text">Format selector failed to load. Restart the app and try again.</div>'
+    };
+  }
+
+  if (!window.DownloadCard) {
+    window.DownloadCard = {
+      render: (item) => `
+        <article class="download-card" data-id="${escapeHtml(item.id)}">
+          <div class="download-main">
+            <div class="download-topline">
+              <div>
+                <h3>${escapeHtml(item.title)}</h3>
+                <p>${escapeHtml(item.selectedFormat || '')}</p>
+              </div>
+              <span class="status ${escapeHtml(item.status)}">${escapeHtml(item.status)}</span>
+            </div>
+          </div>
+          <div class="download-actions">
+            <button data-action="start" ${item.status === 'queued' ? '' : 'disabled'}>Download</button>
+            <button data-action="remove">Remove</button>
+          </div>
+        </article>
+      `
+    };
+  }
+
+  if (!window.SettingsPanel) {
+    window.SettingsPanel = {
+      render: (settings) => `
+        <section class="panel">
+          <h2>Settings</h2>
+          <div class="folder-path">${escapeHtml(settings.downloadFolder || '')}</div>
+          <p class="error-text">Settings panel failed to load. Restart the app and try again.</p>
+        </section>
+      `
+    };
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+  ensureRendererComponents();
   bindNavigation();
   bindDownloader();
   bindQueueActions();
@@ -190,28 +253,48 @@ function applySettingsToForm() {
 }
 
 async function addCurrentToQueue() {
-  if (!appState.metadata) return;
-  await persistOutputSettings();
-  appState.formatSelection = window.FormatSelector.read();
-  const playlistMode = document.querySelector('input[name="playlistMode"]:checked')?.value || 'single';
-  const playlistSelection = playlistMode === 'selected'
-    ? Array.from(document.querySelectorAll('.playlist-entry:checked')).map((input) => input.value)
-    : [];
+  const message = $('#queueMessage');
+  message.textContent = '';
+  message.classList.remove('error-text');
+  if (!appState.metadata) {
+    message.textContent = 'Fetch formats before adding a video to the queue.';
+    message.classList.add('error-text');
+    return;
+  }
 
-  const item = {
-    url: $('#urlInput').value.trim(),
-    title: appState.metadata.title,
-    thumbnail: appState.metadata.thumbnail,
-    folder: appState.settings.downloadFolder,
-    filenameTemplate: $('#filenameTemplate').value,
-    playlistMode: appState.metadata.isPlaylist ? playlistMode : 'single',
-    playlistSelection,
-    selectedFormat: describeSelectedFormat(appState.formatSelection),
-    ...appState.formatSelection
-  };
+  $('#addQueueButton').disabled = true;
+  $('#addQueueButton').textContent = 'Adding...';
 
-  await window.api.queue.add(item);
-  switchPage('queue');
+  try {
+    await persistOutputSettings();
+    appState.formatSelection = window.FormatSelector.read();
+    const playlistMode = document.querySelector('input[name="playlistMode"]:checked')?.value || 'single';
+    const playlistSelection = playlistMode === 'selected'
+      ? Array.from(document.querySelectorAll('.playlist-entry:checked')).map((input) => input.value)
+      : [];
+
+    const item = {
+      url: $('#urlInput').value.trim(),
+      title: appState.metadata.title,
+      thumbnail: appState.metadata.thumbnail,
+      folder: appState.settings.downloadFolder,
+      filenameTemplate: $('#filenameTemplate').value,
+      playlistMode: appState.metadata.isPlaylist ? playlistMode : 'single',
+      playlistSelection,
+      selectedFormat: describeSelectedFormat(appState.formatSelection),
+      ...appState.formatSelection
+    };
+
+    await window.api.queue.add(item);
+    renderQueue(await window.api.queue.list());
+    switchPage('queue');
+  } catch (error) {
+    message.textContent = error.message || 'Could not add this video to the queue.';
+    message.classList.add('error-text');
+  } finally {
+    $('#addQueueButton').disabled = false;
+    $('#addQueueButton').textContent = 'Add to Queue';
+  }
 }
 
 function describeSelectedFormat(selection) {
@@ -226,6 +309,7 @@ function switchPage(page) {
 }
 
 function bindQueueActions() {
+  $('#startQueuedButton').addEventListener('click', () => window.api.queue.startQueued());
   $('#clearCompletedButton').addEventListener('click', () => window.api.queue.clearCompleted());
   $('#queueList').addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-action]');
@@ -234,6 +318,7 @@ function bindQueueActions() {
     const id = card?.dataset.id;
     const action = button.dataset.action;
     const item = appState.queue.find((entry) => entry.id === id);
+    if (action === 'start') await window.api.queue.start(id);
     if (action === 'pause') await window.api.queue.pause(id);
     if (action === 'resume') await window.api.queue.resume(id);
     if (action === 'cancel') await window.api.queue.cancel(id);
@@ -257,7 +342,7 @@ function renderQueue(items) {
 
 function renderSettings() {
   $('#settingsPanel').innerHTML = window.SettingsPanel.render(appState.settings);
-  $('#settingsChooseFolder').addEventListener('click', chooseFolder);
+  $('#settingsChooseFolder')?.addEventListener('click', chooseFolder);
   $('#settingsPanel').querySelectorAll('[data-setting]').forEach((input) => {
     input.addEventListener('change', async () => {
       const key = input.dataset.setting;
@@ -266,9 +351,9 @@ function renderSettings() {
       renderSettings();
     });
   });
-  $('#checkYtDlp').addEventListener('click', async () => showToolStatus(await window.api.tools.checkYtDlp()));
-  $('#checkFfmpeg').addEventListener('click', async () => showToolStatus(await window.api.tools.checkFfmpeg()));
-  $('#updateYtDlp').addEventListener('click', async () => {
+  $('#checkYtDlp')?.addEventListener('click', async () => showToolStatus(await window.api.tools.checkYtDlp()));
+  $('#checkFfmpeg')?.addEventListener('click', async () => showToolStatus(await window.api.tools.checkFfmpeg()));
+  $('#updateYtDlp')?.addEventListener('click', async () => {
     try {
       showToolStatus({ ok: true, message: 'Updating yt-dlp...' });
       const message = await window.api.tools.updateYtDlp();

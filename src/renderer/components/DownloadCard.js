@@ -1,8 +1,15 @@
 (function () {
-  const { escapeHtml } = window.FormatSelector;
+  const escapeHtml = window.FormatSelector?.escapeHtml || ((value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]));
 
   function renderDownloadCard(item) {
     const canPause = item.status === 'downloading';
+    const canStart = item.status === 'queued';
     const canResume = item.status === 'paused';
     const canRetry = item.status === 'failed';
     const percent = Math.max(0, Math.min(100, Number(item.percent || 0)));
@@ -39,6 +46,7 @@
           </details>
         </div>
         <div class="download-actions">
+          <button data-action="start" ${canStart ? '' : 'disabled'}>Download</button>
           <button data-action="pause" ${canPause ? '' : 'disabled'}>Pause</button>
           <button data-action="resume" ${canResume ? '' : 'disabled'}>Resume</button>
           <button data-action="cancel" ${['completed', 'cancelled'].includes(item.status) ? 'disabled' : ''}>Cancel</button>

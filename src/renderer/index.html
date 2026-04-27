@@ -102,17 +102,22 @@
         </section>
 
         <div class="action-row">
+          <p class="download-hint">Add this item to the Queue, then start it from the Queue page.</p>
           <button class="primary-button large" id="addQueueButton" disabled>Add to Queue</button>
         </div>
+        <p class="form-message" id="queueMessage"></p>
       </section>
 
       <section class="page" id="page-queue">
         <header class="page-header">
           <div>
             <h1>Queue</h1>
-            <p>Downloads continue automatically up to your concurrency limit.</p>
+            <p>Queued items wait here until you start them.</p>
           </div>
-          <button class="ghost-button" id="clearCompletedButton">Clear completed</button>
+          <div class="tool-buttons">
+            <button class="primary-button" id="startQueuedButton">Start downloads</button>
+            <button class="ghost-button" id="clearCompletedButton">Clear completed</button>
+          </div>
         </header>
         <div id="queueList" class="queue-list"></div>
       </section>
