@@ -43,6 +43,7 @@
       }
     ],
     "win": {
+      "icon": "assets/icon.ico",
       "target": [
         "portable",
         "nsis"
@@ -51,6 +52,8 @@
       "signDlls": false
     },
     "nsis": {
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
