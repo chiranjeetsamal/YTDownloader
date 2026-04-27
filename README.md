@@ -8,8 +8,6 @@
 
 A polished Windows-friendly Electron desktop app for downloading YouTube videos, Shorts, and playlists with [`yt-dlp`](https://github.com/yt-dlp/yt-dlp). YTDownloader provides a clean GUI for fetching formats, choosing separate video/audio quality, selecting an output folder, and managing downloads with pause, resume, cancel, retry, and queue controls.
 
-It also includes a **Creator Lead Finder** for video editors: search YouTube niches, find active creators with a few thousand subscribers and weak recent view performance, score them as outreach prospects, and export leads to CSV.
-
 > Legal note: Download only content you own, have permission to use, or content available under licenses that allow downloading.
 
 ## Highlights
@@ -26,9 +24,6 @@ It also includes a **Creator Lead Finder** for video editors: search YouTube nic
 - Persistent settings with default folder, quality, container, cookies, theme, and filename templates
 - Optional subtitles, thumbnails, metadata JSON, SponsorBlock removal, speed limit, and audio normalization
 - Copy the exact `yt-dlp` command used for each download
-- Creator Lead Finder for video editing outreach
-- Lead scoring by subscriber range, posting consistency, view/subscriber ratio, contact links, and packaging/editing signals
-- CSV export for prospecting workflows
 - Secure Electron setup with `contextIsolation: true` and `nodeIntegration: false`
 
 ## App Structure
@@ -139,38 +134,6 @@ FFmpeg is required for merging separate video/audio streams, audio conversion, e
 
 Pause/resume behavior is intentionally Windows-safe. `yt-dlp` does not provide universal stdin pause/resume, so the app pauses by terminating the active process and resumes by restarting the same download with `--continue` and partial files enabled.
 
-## Creator Lead Finder
-
-The Lead Finder helps video editors find outreach prospects:
-
-1. Create a YouTube Data API key in Google Cloud.
-2. Open Settings and paste the key into YouTube Data API key.
-3. Open Lead Finder.
-4. Enter niche keywords, such as `fitness coach`, `real estate agent`, `finance podcast`, or `business consultant`.
-5. Set subscriber and activity filters.
-6. Click Find Leads.
-7. Review lead score, reasons, recent videos, contact links, and export CSV.
-
-Good lead signals:
-
-- 2,000 to 50,000 subscribers
-- Posting several times in the last 30 to 60 days
-- Low recent average views compared with subscriber count
-- Long videos, generic titles, weak positioning, or sparse channel description
-- Public contact links or email-like contact info in the channel description
-
-The app only uses public YouTube data. It cannot see private analytics such as retention, impressions, click-through rate, or private business email fields.
-
-### Getting a YouTube Data API Key
-
-1. Go to Google Cloud Console.
-2. Create or select a project.
-3. Enable YouTube Data API v3.
-4. Create an API key.
-5. Paste the key in Settings.
-
-YouTube API quota applies. If searches stop working, wait for quota reset or reduce search limits.
-
 ## Settings
 
 The Settings page includes:
@@ -185,7 +148,6 @@ The Settings page includes:
 - yt-dlp version check
 - yt-dlp auto-update
 - FFmpeg availability check
-- YouTube Data API key for Creator Lead Finder
 
 Output options include filename templates, overwrite behavior, restricted Windows filenames, subtitles, thumbnails, metadata JSON, SponsorBlock removal, speed limits, and audio normalization.
 

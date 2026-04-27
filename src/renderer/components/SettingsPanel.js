@@ -51,15 +51,6 @@
       </section>
 
       <section class="panel">
-        <h2>Lead Finder</h2>
-        <div class="settings-grid">
-          <label class="full-width">YouTube Data API key
-            <input data-setting="youtubeApiKey" type="password" value="${escapeHtml(settings.youtubeApiKey || '')}" placeholder="AIza..." />
-          </label>
-        </div>
-      </section>
-
-      <section class="panel">
         <h2>Cookies</h2>
         <div class="settings-grid">
           <label class="checkbox-line"><input data-setting="useCookies" type="checkbox" ${checked(settings.useCookies)} /> Use browser cookies</label>

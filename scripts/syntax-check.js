@@ -6,7 +6,6 @@ const files = [
   'src/main/main.js',
   'src/main/downloader.js',
   'src/main/formatParser.js',
-  'src/main/leadFinder.js',
   'src/main/settingsStore.js',
   'src/main/queueManager.js',
   'src/preload/preload.js',

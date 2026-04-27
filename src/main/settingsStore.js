@@ -28,7 +28,6 @@ const schema = {
   writeMetadata: { type: 'boolean', default: false },
   sponsorBlock: { type: 'boolean', default: false },
   normalizeAudio: { type: 'boolean', default: false },
-  youtubeApiKey: { type: 'string', default: '' },
   unfinishedQueue: { type: 'array', default: [] }
 };
 
@@ -53,7 +52,6 @@ const defaults = {
   writeMetadata: false,
   sponsorBlock: false,
   normalizeAudio: false,
-  youtubeApiKey: '',
   unfinishedQueue: []
 };
 

@@ -4,7 +4,6 @@ const path = require('path');
 const settingsStore = require('./settingsStore');
 const QueueManager = require('./queueManager');
 const { checkExecutable, fetchMetadata, isSupportedUrl, updateYtDlp } = require('./downloader');
-const { exportLeadsCsv, findLeads } = require('./leadFinder');
 
 let mainWindow;
 let queue;
@@ -70,16 +69,6 @@ ipcMain.handle('dialog:chooseFolder', async () => {
   return folder;
 });
 
-ipcMain.handle('dialog:saveCsv', async (_event, defaultPath) => {
-  const result = await dialog.showSaveDialog(mainWindow, {
-    title: 'Export creator leads',
-    defaultPath: defaultPath || 'creator-leads.csv',
-    filters: [{ name: 'CSV', extensions: ['csv'] }]
-  });
-  if (result.canceled || !result.filePath) return null;
-  return result.filePath;
-});
-
 ipcMain.handle('clipboard:readText', async () => {
   const { clipboard } = require('electron');
   return clipboard.readText();
@@ -107,9 +96,6 @@ ipcMain.handle('queue:openFolder', (_event, id) => queue.openFolder(id));
 ipcMain.handle('tools:checkYtDlp', () => checkExecutable('yt-dlp.exe', ['--version']));
 ipcMain.handle('tools:checkFfmpeg', () => checkExecutable('ffmpeg.exe', ['-version']));
 ipcMain.handle('tools:updateYtDlp', () => updateYtDlp());
-
-ipcMain.handle('leads:search', (_event, options) => findLeads(options, settingsStore.getSettings()));
-ipcMain.handle('leads:exportCsv', async (_event, { filePath, leads }) => exportLeadsCsv(filePath, leads || []));
 
 ipcMain.handle('shell:openPath', (_event, targetPath) => {
   if (typeof targetPath === 'string' && targetPath.trim()) return shell.openPath(targetPath);
