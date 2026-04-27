@@ -46,7 +46,9 @@
       "target": [
         "portable",
         "nsis"
-      ]
+      ],
+      "signAndEditExecutable": false,
+      "signDlls": false
     },
     "nsis": {
       "oneClick": false,
