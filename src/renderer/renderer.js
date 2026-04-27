@@ -2,6 +2,7 @@ const appState = {
   settings: null,
   metadata: null,
   queue: [],
+  leads: [],
   formatSelection: {
     mode: 'video-audio',
     videoQuality: 'best',
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   ensureRendererComponents();
   bindNavigation();
   bindDownloader();
+  bindLeadFinder();
   bindQueueActions();
   appState.settings = await window.api.settings.get();
   applySettingsToForm();
@@ -97,6 +99,151 @@ function bindNavigation() {
       $(`#page-${button.dataset.page}`).classList.add('active');
     });
   });
+}
+
+function bindLeadFinder() {
+  $('#searchLeadsButton').addEventListener('click', searchCreatorLeads);
+  $('#exportLeadsButton').addEventListener('click', exportCreatorLeads);
+  $('#leadResults').addEventListener('click', async (event) => {
+    const videoLink = event.target.closest('[data-video-url]');
+    if (videoLink) {
+      event.preventDefault();
+      await window.api.shell.openPath(videoLink.dataset.videoUrl);
+      return;
+    }
+
+    const button = event.target.closest('button[data-lead-action]');
+    if (!button) return;
+    const card = event.target.closest('.lead-card');
+    const id = card?.dataset.id;
+    const lead = appState.leads.find((item) => item.id === id);
+    if (!lead) return;
+
+    if (button.dataset.leadAction === 'open-channel') {
+      await window.api.shell.openPath(lead.channelUrl);
+    }
+    if (button.dataset.leadAction === 'copy-outreach') {
+      await navigator.clipboard.writeText(buildOutreachMessage(lead));
+      button.textContent = 'Copied';
+      setTimeout(() => {
+        button.textContent = 'Copy outreach';
+      }, 1200);
+    }
+  });
+}
+
+async function searchCreatorLeads() {
+  const message = $('#leadMessage');
+  message.textContent = '';
+  message.classList.remove('error-text');
+  $('#searchLeadsButton').disabled = true;
+  $('#searchLeadsButton').textContent = 'Searching...';
+  $('#leadResults').innerHTML = '<section class="panel empty-state">Searching YouTube channels and scoring prospects...</section>';
+
+  try {
+    const result = await window.api.leads.search({
+      keywords: $('#leadKeywords').value,
+      minSubscribers: $('#leadMinSubs').value,
+      maxSubscribers: $('#leadMaxSubs').value,
+      recentDays: $('#leadRecentDays').value,
+      minUploads: $('#leadMinUploads').value,
+      maxViewRatio: $('#leadMaxViewRatio').value,
+      maxResults: $('#leadMaxResults').value
+    });
+    appState.leads = result.leads || [];
+    renderLeads();
+  } catch (error) {
+    appState.leads = [];
+    $('#leadResults').innerHTML = '';
+    message.textContent = error.message || 'Could not search creator leads.';
+    message.classList.add('error-text');
+    renderLeadCount();
+  } finally {
+    $('#searchLeadsButton').disabled = false;
+    $('#searchLeadsButton').textContent = 'Find Leads';
+  }
+}
+
+function renderLeads() {
+  renderLeadCount();
+  $('#exportLeadsButton').disabled = appState.leads.length === 0;
+  $('#leadResults').innerHTML = appState.leads.length
+    ? appState.leads.map(renderLeadCard).join('')
+    : '<section class="panel empty-state">No matching creator leads found. Try a wider subscriber range, lower upload minimum, or broader niche keyword.</section>';
+}
+
+function renderLeadCount() {
+  const count = appState.leads.length;
+  $('#leadCountPill').textContent = count ? `${count} leads found` : 'No leads yet';
+}
+
+function renderLeadCard(lead) {
+  const ratio = Math.round((lead.viewToSubRatio || 0) * 100);
+  const contacts = [...(lead.emails || []), ...(lead.contactLinks || [])];
+  return `
+    <article class="lead-card panel" data-id="${escapeHtml(lead.id)}">
+      <div class="lead-card-header">
+        <img class="lead-avatar" src="${escapeHtml(lead.thumbnail || '')}" alt="" />
+        <div class="lead-title-block">
+          <div class="lead-title-row">
+            <h2>${escapeHtml(lead.title)}</h2>
+            <span class="lead-tier ${escapeHtml(lead.leadTier.toLowerCase())}">${escapeHtml(lead.leadTier)} lead</span>
+          </div>
+          <p>${escapeHtml((lead.description || 'No channel description available.').slice(0, 180))}</p>
+        </div>
+        <div class="lead-score">
+          <strong>${lead.score}</strong>
+          <span>score</span>
+        </div>
+      </div>
+      <div class="lead-metrics">
+        <span><strong>${formatNumber(lead.subscriberCount)}</strong> subscribers</span>
+        <span><strong>${formatNumber(lead.avgRecentViews)}</strong> avg views</span>
+        <span><strong>${ratio}%</strong> view/sub</span>
+        <span><strong>${lead.recentUploadCount}</strong> recent uploads</span>
+        <span><strong>${lead.uploadCadenceDays || '-'}</strong> day cadence</span>
+      </div>
+      <div class="lead-reasons">
+        ${(lead.reasons || []).map((reason) => `<span>${escapeHtml(reason)}</span>`).join('')}
+      </div>
+      <div class="lead-contact">
+        <strong>Contact:</strong>
+        <span>${contacts.length ? escapeHtml(contacts.join(' | ')) : 'No public contact found in channel text.'}</span>
+      </div>
+      <details>
+        <summary>Recent videos</summary>
+        <div class="lead-video-list">
+          ${(lead.recentVideos || []).slice(0, 5).map((video) => `
+            <a href="#" data-video-url="${escapeHtml(video.url)}">
+              ${escapeHtml(video.title)} <span>${formatNumber(video.views)} views</span>
+            </a>
+          `).join('')}
+        </div>
+      </details>
+      <div class="lead-actions">
+        <button class="primary-button" data-lead-action="open-channel">Open channel</button>
+        <button class="ghost-button" data-lead-action="copy-outreach">Copy outreach</button>
+      </div>
+    </article>
+  `;
+}
+
+async function exportCreatorLeads() {
+  if (!appState.leads.length) return;
+  const filePath = await window.api.dialog.saveCsv('creator-leads.csv');
+  if (!filePath) return;
+  await window.api.leads.exportCsv(filePath, appState.leads);
+  $('#leadMessage').textContent = `Exported ${appState.leads.length} leads to ${filePath}`;
+  $('#leadMessage').classList.remove('error-text');
+}
+
+function buildOutreachMessage(lead) {
+  const video = lead.recentVideos?.[0];
+  return `Hey ${lead.title}, I noticed you are posting consistently on YouTube, which is honestly the hardest part. I also saw a few places where tighter editing, stronger hooks, and thumbnail/title packaging could probably help your videos perform better${video ? `, especially around "${video.title}"` : ''}. I am a video editor and would be happy to share a quick idea for improving one of your recent videos.`;
+}
+
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString();
 }
 
 function bindDownloader() {

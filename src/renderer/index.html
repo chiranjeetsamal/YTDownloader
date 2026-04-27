@@ -17,6 +17,7 @@
       </div>
       <nav>
         <button class="nav-item active" data-page="downloader">Downloader</button>
+        <button class="nav-item" data-page="leads">Lead Finder</button>
         <button class="nav-item" data-page="queue">Queue</button>
         <button class="nav-item" data-page="settings">Settings</button>
         <button class="nav-item" data-page="logs">Logs</button>
@@ -106,6 +107,60 @@
           <button class="primary-button large" id="addQueueButton" disabled>Add to Queue</button>
         </div>
         <p class="form-message" id="queueMessage"></p>
+      </section>
+
+      <section class="page" id="page-leads">
+        <header class="page-header">
+          <div>
+            <h1>Creator Lead Finder</h1>
+            <p>Find active YouTube creators who may need stronger editing, packaging, and retention help.</p>
+          </div>
+          <button class="ghost-button" id="exportLeadsButton" disabled>Export CSV</button>
+        </header>
+
+        <section class="panel lead-search-panel">
+          <div class="section-title">
+            <h2>Search Criteria</h2>
+            <span class="pill" id="leadCountPill">No leads yet</span>
+          </div>
+          <div class="lead-search-grid">
+            <label class="full-width">
+              Niche keywords
+              <input id="leadKeywords" type="text" placeholder="fitness coach, real estate agent, finance podcast" />
+            </label>
+            <label>
+              Min subscribers
+              <input id="leadMinSubs" type="number" value="2000" min="1" />
+            </label>
+            <label>
+              Max subscribers
+              <input id="leadMaxSubs" type="number" value="50000" min="1" />
+            </label>
+            <label>
+              Recent days
+              <input id="leadRecentDays" type="number" value="45" min="7" max="180" />
+            </label>
+            <label>
+              Min uploads
+              <input id="leadMinUploads" type="number" value="4" min="1" max="30" />
+            </label>
+            <label>
+              Max view/sub ratio
+              <input id="leadMaxViewRatio" type="number" value="0.15" min="0.01" max="1" step="0.01" />
+            </label>
+            <label>
+              Search limit
+              <input id="leadMaxResults" type="number" value="25" min="5" max="50" />
+            </label>
+          </div>
+          <div class="action-row">
+            <p class="download-hint">Best starter niches: coaches, podcasts, educators, agents, consultants, and creators selling services.</p>
+            <button class="primary-button large" id="searchLeadsButton">Find Leads</button>
+          </div>
+          <p class="form-message" id="leadMessage"></p>
+        </section>
+
+        <div id="leadResults" class="lead-results"></div>
       </section>
 
       <section class="page" id="page-queue">

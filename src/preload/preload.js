@@ -6,7 +6,8 @@ contextBridge.exposeInMainWorld('api', {
     update: (settings) => ipcRenderer.invoke('settings:update', settings)
   },
   dialog: {
-    chooseFolder: () => ipcRenderer.invoke('dialog:chooseFolder')
+    chooseFolder: () => ipcRenderer.invoke('dialog:chooseFolder'),
+    saveCsv: (defaultPath) => ipcRenderer.invoke('dialog:saveCsv', defaultPath)
   },
   clipboard: {
     readText: () => ipcRenderer.invoke('clipboard:readText')
@@ -38,6 +39,10 @@ contextBridge.exposeInMainWorld('api', {
     checkYtDlp: () => ipcRenderer.invoke('tools:checkYtDlp'),
     checkFfmpeg: () => ipcRenderer.invoke('tools:checkFfmpeg'),
     updateYtDlp: () => ipcRenderer.invoke('tools:updateYtDlp')
+  },
+  leads: {
+    search: (options) => ipcRenderer.invoke('leads:search', options),
+    exportCsv: (filePath, leads) => ipcRenderer.invoke('leads:exportCsv', { filePath, leads })
   },
   shell: {
     openPath: (targetPath) => ipcRenderer.invoke('shell:openPath', targetPath)
