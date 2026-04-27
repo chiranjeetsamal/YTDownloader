@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>yt-dlp Desktop</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">YT</div>
+        <div>
+          <strong>yt-dlp Desktop</strong>
+          <span>Windows downloader</span>
+        </div>
+      </div>
+      <nav>
+        <button class="nav-item active" data-page="downloader">Downloader</button>
+        <button class="nav-item" data-page="queue">Queue</button>
+        <button class="nav-item" data-page="settings">Settings</button>
+        <button class="nav-item" data-page="logs">Logs</button>
+      </nav>
+      <footer>Download only content you own, have permission to use, or content available under licenses that allow downloading.</footer>
+    </aside>
+
+    <main class="app-shell">
+      <section class="page active" id="page-downloader">
+        <header class="page-header">
+          <div>
+            <h1>Downloader</h1>
+            <p>Paste a video, Shorts, or playlist URL and choose exactly what to save.</p>
+          </div>
+          <button class="ghost-button" id="pasteButton">Paste from clipboard</button>
+        </header>
+
+        <section class="panel url-panel">
+          <label for="urlInput">YouTube URL</label>
+          <div class="input-row">
+            <input id="urlInput" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+            <button class="primary-button" id="fetchButton">Fetch Formats</button>
+          </div>
+          <p class="form-message" id="urlMessage"></p>
+        </section>
+
+        <section class="preview-grid">
+          <article class="panel metadata-panel" id="metadataPanel">
+            <div class="empty-state">Video details will appear here after fetching formats.</div>
+          </article>
+          <article class="panel" id="formatPanel">
+            <div class="empty-state">Format choices will appear here.</div>
+          </article>
+        </section>
+
+        <section class="panel output-panel">
+          <div class="section-title">
+            <h2>Output</h2>
+            <button class="ghost-button" id="chooseFolderButton">Choose Folder</button>
+          </div>
+          <div class="folder-path" id="folderPath"></div>
+          <div class="settings-grid compact">
+            <label>
+              Filename template
+              <select id="templatePreset">
+                <option value="%(title)s.%(ext)s">Title only</option>
+                <option value="%(title)s - %(uploader)s.%(ext)s">Title + channel</option>
+                <option value="%(upload_date)s - %(title)s.%(ext)s">Title + date</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label>
+              Custom template
+              <input id="filenameTemplate" type="text" value="%(title)s.%(ext)s" />
+            </label>
+            <label class="checkbox-line">
+              <input id="restrictFilenames" type="checkbox" />
+              Windows-safe restricted names
+            </label>
+            <label class="checkbox-line">
+              <input id="overwriteFiles" type="checkbox" />
+              Overwrite existing files
+            </label>
+          </div>
+        </section>
+
+        <section class="panel advanced-panel">
+          <div class="section-title">
+            <h2>Extras</h2>
+            <span id="ffmpegStatus" class="pill">FFmpeg not checked</span>
+          </div>
+          <div class="settings-grid compact">
+            <label class="checkbox-line"><input id="downloadSubtitles" type="checkbox" /> Download subtitles</label>
+            <label>Subtitle language <input id="subtitleLanguage" type="text" value="en" /></label>
+            <label class="checkbox-line"><input id="embedSubtitles" type="checkbox" /> Embed subtitles</label>
+            <label class="checkbox-line"><input id="downloadThumbnail" type="checkbox" /> Download thumbnail</label>
+            <label class="checkbox-line"><input id="embedThumbnail" type="checkbox" /> Embed thumbnail</label>
+            <label class="checkbox-line"><input id="writeMetadata" type="checkbox" /> Save metadata JSON</label>
+            <label class="checkbox-line"><input id="sponsorBlock" type="checkbox" /> Remove SponsorBlock sections</label>
+            <label>Speed limit <input id="speedLimit" type="text" placeholder="2M, 500K, blank for none" /></label>
+            <label class="checkbox-line"><input id="normalizeAudio" type="checkbox" /> Audio normalization</label>
+          </div>
+        </section>
+
+        <div class="action-row">
+          <button class="primary-button large" id="addQueueButton" disabled>Add to Queue</button>
+        </div>
+      </section>
+
+      <section class="page" id="page-queue">
+        <header class="page-header">
+          <div>
+            <h1>Queue</h1>
+            <p>Downloads continue automatically up to your concurrency limit.</p>
+          </div>
+          <button class="ghost-button" id="clearCompletedButton">Clear completed</button>
+        </header>
+        <div id="queueList" class="queue-list"></div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <header class="page-header">
+          <div>
+            <h1>Settings</h1>
+            <p>Configure defaults, tools, cookies, and app appearance.</p>
+          </div>
+        </header>
+        <div id="settingsPanel"></div>
+      </section>
+
+      <section class="page" id="page-logs">
+        <header class="page-header">
+          <div>
+            <h1>Logs</h1>
+            <p>Recent queue activity and exact yt-dlp commands.</p>
+          </div>
+        </header>
+        <section class="panel">
+          <pre id="logsOutput" class="logs-output"></pre>
+        </section>
+      </section>
+    </main>
+
+    <script src="./components/DownloadCard.js"></script>
+    <script src="./components/FormatSelector.js"></script>
+    <script src="./components/SettingsPanel.js"></script>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

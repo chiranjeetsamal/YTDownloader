@@ -1,0 +1,56 @@
+{
+  "name": "yt-dlp-desktop",
+  "version": "1.0.0",
+  "description": "A polished Electron desktop app for downloading YouTube videos with yt-dlp.",
+  "main": "src/main/main.js",
+  "author": "Codex",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder",
+    "build:portable": "electron-builder --win portable",
+    "lint:syntax": "node scripts/syntax-check.js"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "fs-extra": "^11.3.0",
+    "sanitize-filename": "^1.6.3"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.codex.ytdlpdesktop",
+    "productName": "yt-dlp Desktop",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "README.md",
+      "bin/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
