@@ -18,7 +18,7 @@ function createWindow() {
     minWidth: 980,
     minHeight: 680,
     backgroundColor: '#f6f7fb',
-    title: 'yt-dlp Desktop',
+    title: 'YTDownloader',
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,

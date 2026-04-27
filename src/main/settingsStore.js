@@ -32,7 +32,7 @@ const schema = {
 };
 
 const defaults = {
-  downloadFolder: path.join(downloadsPath, 'yt-dlp Desktop'),
+  downloadFolder: path.join(downloadsPath, 'YTDownloader'),
   defaultVideoQuality: 'best',
   defaultAudioFormat: 'best',
   defaultContainer: 'mp4',

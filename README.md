@@ -1,4 +1,4 @@
-# yt-dlp Desktop
+# YTDownloader
 
 ![Platform](https://img.shields.io/badge/platform-Windows-0078D4?style=for-the-badge&logo=windows)
 ![Electron](https://img.shields.io/badge/Electron-30-47848F?style=for-the-badge&logo=electron)
@@ -6,7 +6,7 @@
 ![FFmpeg](https://img.shields.io/badge/media-FFmpeg-007808?style=for-the-badge&logo=ffmpeg)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
 
-A polished Windows-friendly Electron desktop app for downloading YouTube videos, Shorts, and playlists with [`yt-dlp`](https://github.com/yt-dlp/yt-dlp). It provides a clean GUI for fetching formats, choosing separate video/audio quality, selecting an output folder, and managing downloads with pause, resume, cancel, retry, and queue controls.
+A polished Windows-friendly Electron desktop app for downloading YouTube videos, Shorts, and playlists with [`yt-dlp`](https://github.com/yt-dlp/yt-dlp). YTDownloader provides a clean GUI for fetching formats, choosing separate video/audio quality, selecting an output folder, and managing downloads with pause, resume, cancel, retry, and queue controls.
 
 > Legal note: Download only content you own, have permission to use, or content available under licenses that allow downloading.
 

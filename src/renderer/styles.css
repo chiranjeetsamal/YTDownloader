@@ -1,27 +1,39 @@
 :root {
   color-scheme: light dark;
-  --bg: #f5f7fb;
+  --bg: #fbf7f7;
+  --bg-end: #fffafa;
   --panel: #ffffff;
-  --panel-soft: #eef3f8;
-  --text: #1f2933;
-  --muted: #65758b;
-  --line: #d7e0ea;
-  --accent: #0f8b8d;
-  --accent-strong: #0b6769;
+  --panel-soft: #fff0f0;
+  --text: #1f1718;
+  --muted: #725c60;
+  --line: #ead7da;
+  --accent: #dc2626;
+  --accent-strong: #b91c1c;
+  --accent-soft: #fee2e2;
+  --accent-ink: #7f1d1d;
   --danger: #b42318;
   --ok: #087443;
-  --shadow: 0 16px 40px rgba(31, 41, 51, 0.08);
+  --sidebar: #230b0d;
+  --sidebar-soft: #3b1013;
+  --shadow: 0 18px 50px rgba(80, 24, 28, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #101418;
-    --panel: #171d22;
-    --panel-soft: #202930;
-    --text: #eef3f8;
-    --muted: #a7b4c2;
-    --line: #2d3944;
-    --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+    --bg: #110d0e;
+    --bg-end: #1b1112;
+    --panel: #1c1516;
+    --panel-soft: #2b1719;
+    --text: #fff7f7;
+    --muted: #c9aeb2;
+    --line: #3f2a2d;
+    --accent: #ef4444;
+    --accent-strong: #f87171;
+    --accent-soft: #3a1719;
+    --accent-ink: #fecaca;
+    --sidebar: #170708;
+    --sidebar-soft: #310d10;
+    --shadow: 0 20px 55px rgba(0, 0, 0, 0.34);
   }
 }
 
@@ -34,9 +46,13 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 260px 1fr;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(220, 38, 38, 0.12), transparent 36rem),
+    linear-gradient(135deg, var(--bg), var(--bg-end));
   color: var(--text);
-  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
 }
 
 button,
@@ -48,6 +64,7 @@ select {
 button {
   border: 0;
   cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, border-color 120ms ease;
 }
 
 button:disabled {
@@ -61,7 +78,9 @@ button:disabled {
   gap: 28px;
   min-height: 100vh;
   padding: 24px;
-  background: #172026;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 28%),
+    linear-gradient(180deg, var(--sidebar), var(--sidebar-soft));
   color: #f9fbfd;
 }
 
@@ -76,15 +95,16 @@ button:disabled {
   place-items: center;
   width: 42px;
   height: 42px;
-  border-radius: 8px;
-  background: var(--accent);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff4d4d, #b91c1c);
+  box-shadow: 0 14px 28px rgba(220, 38, 38, 0.35);
   font-weight: 800;
 }
 
 .brand span,
 .sidebar footer {
   display: block;
-  color: #bcc8d4;
+  color: #efc7ca;
   font-size: 13px;
 }
 
@@ -98,13 +118,14 @@ button:disabled {
   padding: 12px 14px;
   border-radius: 8px;
   background: transparent;
-  color: #dbe5ed;
+  color: #f5dadd;
   text-align: left;
+  font-weight: 700;
 }
 
 .nav-item.active,
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.13);
   color: #ffffff;
 }
 
@@ -147,15 +168,19 @@ p {
 }
 
 h1 {
-  font-size: 32px;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
 h2 {
-  font-size: 18px;
+  font-size: 19px;
+  font-weight: 800;
 }
 
 h3 {
   font-size: 16px;
+  font-weight: 800;
 }
 
 .page-header {
@@ -175,12 +200,12 @@ h3 {
 .download-card {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: var(--shadow);
 }
 
 .panel {
-  padding: 20px;
+  padding: 22px;
   margin-bottom: 18px;
 }
 
@@ -203,6 +228,13 @@ select {
   color: var(--text);
 }
 
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.16);
+  outline: none;
+}
+
 .input-row input {
   flex: 1;
 }
@@ -218,12 +250,14 @@ select {
 }
 
 .primary-button {
-  background: var(--accent);
+  background: linear-gradient(180deg, #ef4444, var(--accent));
   color: #fff;
+  box-shadow: 0 12px 24px rgba(220, 38, 38, 0.24);
 }
 
 .primary-button:hover {
   background: var(--accent-strong);
+  transform: translateY(-1px);
 }
 
 .ghost-button,
@@ -232,6 +266,14 @@ select {
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--text);
+}
+
+.ghost-button:hover,
+.download-actions button:hover,
+.command-row button:hover {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 .large {
@@ -259,7 +301,7 @@ select {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 8px;
-  background: var(--panel-soft);
+  background: linear-gradient(135deg, var(--panel-soft), #fff8f8);
   margin-bottom: 16px;
 }
 
@@ -291,8 +333,8 @@ select {
   min-height: 28px;
   border-radius: 999px;
   padding: 0 10px;
-  background: var(--panel-soft);
-  color: var(--muted);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
   font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
@@ -329,7 +371,7 @@ select {
   margin-top: 12px;
   padding: 12px;
   border-radius: 8px;
-  background: var(--panel-soft);
+  background: var(--accent-soft);
   color: var(--muted);
   word-break: break-all;
 }
@@ -405,7 +447,7 @@ select {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--accent);
+  background: linear-gradient(90deg, #f87171, var(--accent));
 }
 
 .status.completed {

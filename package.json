@@ -1,5 +1,5 @@
 {
-  "name": "yt-dlp-desktop",
+  "name": "ytdownloader",
   "version": "1.0.0",
   "description": "A polished Electron desktop app for downloading YouTube videos with yt-dlp.",
   "main": "src/main/main.js",
@@ -22,8 +22,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "com.codex.ytdlpdesktop",
-    "productName": "yt-dlp Desktop",
+    "appId": "com.codex.ytdownloader",
+    "productName": "YTDownloader",
     "directories": {
       "output": "dist"
     },
