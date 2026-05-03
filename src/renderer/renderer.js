@@ -2,6 +2,7 @@ const appState = {
   settings: null,
   metadata: null,
   queue: [],
+  ffmpegAvailable: false,
   formatSelection: {
     mode: 'video-audio',
     videoQuality: 'best',
@@ -107,6 +108,7 @@ function bindDownloader() {
   $('#fetchButton').addEventListener('click', fetchFormats);
   $('#chooseFolderButton').addEventListener('click', chooseFolder);
   $('#addQueueButton').addEventListener('click', addCurrentToQueue);
+  $('#clipEnabled').addEventListener('change', toggleClipControls);
 
   $('#templatePreset').addEventListener('change', () => {
     const preset = $('#templatePreset').value;
@@ -130,6 +132,13 @@ function bindDownloader() {
   ].forEach((selector) => {
     $(selector).addEventListener('change', persistOutputSettings);
   });
+}
+
+function toggleClipControls() {
+  const enabled = $('#clipEnabled').checked;
+  $('#clipStart').disabled = !enabled;
+  $('#clipEnd').disabled = !enabled;
+  $('#forceKeyframesAtCuts').disabled = !enabled || !appState.ffmpegAvailable;
 }
 
 async function fetchFormats() {
@@ -268,6 +277,7 @@ async function addCurrentToQueue() {
   try {
     await persistOutputSettings();
     appState.formatSelection = window.FormatSelector.read();
+    const clip = readClipSelection();
     const playlistMode = document.querySelector('input[name="playlistMode"]:checked')?.value || 'single';
     const playlistSelection = playlistMode === 'selected'
       ? Array.from(document.querySelectorAll('.playlist-entry:checked')).map((input) => input.value)
@@ -281,7 +291,8 @@ async function addCurrentToQueue() {
       filenameTemplate: $('#filenameTemplate').value,
       playlistMode: appState.metadata.isPlaylist ? playlistMode : 'single',
       playlistSelection,
-      selectedFormat: describeSelectedFormat(appState.formatSelection),
+      selectedFormat: describeSelectedFormat(appState.formatSelection, clip),
+      ...clip,
       ...appState.formatSelection
     };
 
@@ -297,11 +308,37 @@ async function addCurrentToQueue() {
   }
 }
 
-function describeSelectedFormat(selection) {
-  if (selection.editingPreset) return 'Editing preset MP4/H.264/AAC';
-  if (selection.mode === 'audio-only') return `Audio only ${selection.audioFormat}`;
-  if (selection.mode === 'video-only') return `Video only ${selection.videoQuality}`;
-  return `Video ${selection.videoQuality} + audio, ${selection.container}`;
+function readClipSelection() {
+  const clipEnabled = $('#clipEnabled').checked;
+  const clipStart = $('#clipStart').value.trim();
+  const clipEnd = $('#clipEnd').value.trim();
+  if (clipEnabled) {
+    if (!clipStart || !clipEnd) {
+      throw new Error('Enter both clip start and end times before adding to the queue.');
+    }
+    if (!isValidClipTime(clipStart) || !isValidClipTime(clipEnd)) {
+      throw new Error('Clip times must use seconds, MM:SS, or HH:MM:SS. Example: 90, 01:30, or 00:01:30.');
+    }
+  }
+  return {
+    clipEnabled,
+    clipStart,
+    clipEnd,
+    forceKeyframesAtCuts: $('#forceKeyframesAtCuts').checked
+  };
+}
+
+function isValidClipTime(value) {
+  return /^\d+$/.test(value) || /^\d{1,2}:\d{2}$/.test(value) || /^\d{1,2}:\d{2}:\d{2}(?:\.\d+)?$/.test(value);
+}
+
+function describeSelectedFormat(selection, clip = {}) {
+  let label;
+  if (selection.editingPreset) label = 'Editing preset MP4/H.264/AAC';
+  else if (selection.mode === 'audio-only') label = `Audio only ${selection.audioFormat}`;
+  else if (selection.mode === 'video-only') label = `Video only ${selection.videoQuality}`;
+  else label = `Video ${selection.videoQuality} + audio, ${selection.container}`;
+  return clip.clipEnabled ? `${label} | clip ${clip.clipStart}-${clip.clipEnd}` : label;
 }
 
 function switchPage(page) {
@@ -370,6 +407,13 @@ function showToolStatus(result) {
 
 async function checkFfmpegQuickly() {
   const result = await window.api.tools.checkFfmpeg();
+  appState.ffmpegAvailable = result.ok;
   $('#ffmpegStatus').textContent = result.ok ? 'FFmpeg available' : 'FFmpeg unavailable';
   $('#normalizeAudio').disabled = !result.ok;
+  if (!result.ok) {
+    $('#forceKeyframesAtCuts').checked = false;
+    $('#forceKeyframesAtCuts').disabled = true;
+  } else {
+    toggleClipControls();
+  }
 }

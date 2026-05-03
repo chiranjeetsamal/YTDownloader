@@ -124,6 +124,27 @@ function addCommonArgs(args, item, settings) {
   if (settings.writeMetadata) args.push('--write-info-json');
   if (settings.sponsorBlock) args.push('--sponsorblock-remove', 'sponsor,intro,outro,selfpromo,preview');
   if (settings.normalizeAudio) args.push('--postprocessor-args', 'ffmpeg:-af loudnorm');
+  addClipArgs(args, item);
+}
+
+function addClipArgs(args, item) {
+  if (!item.clipEnabled) return;
+  const start = normalizeClipTime(item.clipStart);
+  const end = normalizeClipTime(item.clipEnd);
+  if (!start || !end) {
+    throw new Error('Enter both clip start and end times, for example 00:01:30 and 00:02:45.');
+  }
+  args.push('--download-sections', `*${start}-${end}`);
+  if (item.forceKeyframesAtCuts !== false) args.push('--force-keyframes-at-cuts');
+}
+
+function normalizeClipTime(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  if (/^\d+$/.test(text)) return text;
+  if (/^\d{1,2}:\d{2}$/.test(text)) return text;
+  if (/^\d{1,2}:\d{2}:\d{2}(?:\.\d+)?$/.test(text)) return text;
+  throw new Error('Clip times must use seconds, MM:SS, or HH:MM:SS. Example: 90, 01:30, or 00:01:30.');
 }
 
 function sanitizeTemplate(template) {
@@ -238,6 +259,7 @@ module.exports = {
   fetchMetadata,
   friendlyError,
   isSupportedUrl,
+  normalizeClipTime,
   parseProgressLine,
   resolveExecutable,
   spawnProcess,

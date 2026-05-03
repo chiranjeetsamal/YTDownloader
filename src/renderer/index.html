@@ -83,6 +83,31 @@
           </div>
         </section>
 
+        <section class="panel clip-panel">
+          <div class="section-title">
+            <h2>Clip Range</h2>
+            <span class="pill">Optional</span>
+          </div>
+          <div class="settings-grid compact">
+            <label class="checkbox-line full-width">
+              <input id="clipEnabled" type="checkbox" />
+              Download only a specific part of the video
+            </label>
+            <label>
+              Start time
+              <input id="clipStart" type="text" placeholder="00:01:30" disabled />
+            </label>
+            <label>
+              End time
+              <input id="clipEnd" type="text" placeholder="00:02:45" disabled />
+            </label>
+            <label class="checkbox-line full-width">
+              <input id="forceKeyframesAtCuts" type="checkbox" checked disabled />
+              Accurate cuts with FFmpeg
+            </label>
+          </div>
+        </section>
+
         <section class="panel advanced-panel">
           <div class="section-title">
             <h2>Extras</h2>

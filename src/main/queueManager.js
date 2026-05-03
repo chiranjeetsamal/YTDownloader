@@ -1,5 +1,6 @@
 const { EventEmitter } = require('events');
 const crypto = require('crypto');
+const { spawn } = require('child_process');
 const { shell, Notification } = require('electron');
 const { buildDownloadArgs, friendlyError, parseProgressLine, spawnProcess } = require('./downloader');
 
@@ -72,7 +73,9 @@ class QueueManager extends EventEmitter {
     const child = this.processes.get(id);
     if (child) {
       item.wasPaused = true;
-      child.kill('SIGTERM');
+      item.logs = item.logs || [];
+      item.logs.push('Pausing download. The process will be restarted with --continue when resumed.');
+      killProcessTree(child, false);
     }
     item.status = 'paused';
     this.processes.delete(id);
@@ -94,10 +97,14 @@ class QueueManager extends EventEmitter {
     const item = this.items.get(id);
     if (!item) return;
     const child = this.processes.get(id);
-    if (child) child.kill('SIGTERM');
+    item.wasCancelled = true;
+    item.logs = item.logs || [];
+    if (child) {
+      item.logs.push('Cancelling download and stopping yt-dlp/FFmpeg process tree.');
+      killProcessTree(child, true);
+    }
     this.processes.delete(id);
     item.status = 'cancelled';
-    item.wasCancelled = true;
     this.persist();
     this.emitUpdate();
   }
@@ -145,7 +152,18 @@ class QueueManager extends EventEmitter {
     item.status = 'downloading';
     item.error = '';
     item.logs = item.logs || [];
-    const args = buildDownloadArgs(item, settings);
+    let args;
+    try {
+      args = buildDownloadArgs(item, settings);
+    } catch (error) {
+      item.status = 'failed';
+      item.error = error.message;
+      item.logs.push(error.message);
+      this.persist();
+      this.emitUpdate();
+      this.pump();
+      return;
+    }
     item.command = `yt-dlp ${args.map(quoteArg).join(' ')}`;
     item.logs.push(`> ${item.command}`);
     const child = spawnProcess(args);
@@ -224,6 +242,38 @@ class QueueManager extends EventEmitter {
   openFolder(id) {
     const item = this.items.get(id);
     if (item && item.folder) shell.openPath(item.folder);
+  }
+}
+
+function killProcessTree(child, force) {
+  if (!child || !child.pid || child.killed) return;
+  if (process.platform === 'win32') {
+    const args = ['/PID', String(child.pid), '/T'];
+    if (force) args.push('/F');
+    const killer = spawn('taskkill', args, { windowsHide: true, shell: false });
+    killer.on('error', () => {
+      try {
+        child.kill('SIGTERM');
+      } catch {
+        // Process is already gone.
+      }
+    });
+    killer.on('close', (code) => {
+      if (code !== 0) {
+        try {
+          child.kill(force ? 'SIGKILL' : 'SIGTERM');
+        } catch {
+          // Process is already gone.
+        }
+      }
+    });
+    return;
+  }
+
+  try {
+    child.kill(force ? 'SIGKILL' : 'SIGTERM');
+  } catch {
+    // Process is already gone.
   }
 }
 
